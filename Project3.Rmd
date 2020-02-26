@@ -1,0 +1,63 @@
+---
+title: "Developing Data Products - Week 4 Assignment"
+author: "Rick M"
+date: "2/25/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Week 4 Project
+
+- This is a for the week four project for Developing Data Products where we were to create a shinny application.  
+- I used the mtCars dataset to look at hour transmission, number of cylinders, and number of gears impacted fuel economy in the dataset. 
+- The link to the Shiny app can be found here:
+- The link to the code can be found here: https://github.com/ricmaur/DevDataProdWeek4
+
+## Overview
+
+The shinny application uses plotly to graph fuel economy (MPG) against different variables
+
+```{r}
+head(mtcars)
+```
+
+## Server Code
+
+library(shiny)
+library(plotly)
+mpgData <- mtcars
+mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
+shinyServer(function(input, output) {
+    formulaText <- reactive({
+        paste("MPG vs ", input$variable)
+    })
+    output$caption <- renderText({
+        formulaText()
+    })
+    output$mpgPlot <- renderPlot({
+        ggplot(mpgData, aes_string(y=input$variable, x="mpg")) + geom_point()
+    })
+})
+
+
+## UI Code
+
+library(shiny)
+shinyUI(fluidPage(
+    titlePanel("mtcars Dataset - Miles per Gallon"),
+    sidebarPanel(
+        selectInput("variable", "Select an option to see how various factors impact MPG:", 
+                    c("Cylinders" = "cyl",
+                      "Transmission" = "am",
+                      "Gears" = "gear"))
+    ),
+    mainPanel(
+        h3(textOutput("caption")),
+        plotOutput("mpgPlot")
+    )
+))
+
+
